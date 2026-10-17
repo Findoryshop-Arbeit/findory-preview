@@ -54,3 +54,25 @@
   };
   reveal(); addEventListener('hashchange', reveal);
 })();
+// Parent categories stay naturally mixed; only complete subcategories filter.
+(() => {
+  const rows = [...document.querySelectorAll('.family-row[data-category-group]')];
+  const heading = document.querySelector('[data-selection-title]');
+  const controls = document.querySelector('[data-category-filter-controls]');
+  if (!rows.length || !heading || !controls) return;
+  const original = heading.textContent;
+  const apply = () => {
+    let hash;
+    try { hash = decodeURIComponent(location.hash.slice(1)); } catch { hash = ''; }
+    const target = document.getElementById(hash);
+    const group = target?.dataset.categoryFilter;
+    rows.forEach(row => { row.hidden = !!group && row.dataset.categoryGroup !== group; });
+    heading.textContent = group ? target.dataset.categoryTitle : original;
+    controls.hidden = !group;
+    controls.querySelector('[role="status"]').textContent = group ? `${target.dataset.categoryCount} Produkte in dieser Auswahl` : '';
+    if (group) heading.scrollIntoView({block:'start',behavior:'instant'});
+    else if (target?.matches('.family-row')) target.scrollIntoView({block:'start',behavior:'instant'});
+  };
+  addEventListener('hashchange', apply);
+  apply();
+})();
