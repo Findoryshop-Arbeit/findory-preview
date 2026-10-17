@@ -31,3 +31,26 @@
   mobile.addEventListener('change', () => setOpen(false));
   reduced.addEventListener('change', () => { if (menuAnimation) menuAnimation.cancel(); });
 })();
+
+(() => {
+  const menu = document.querySelector('.category-menu');
+  if (!menu) return;
+  const branches = [...menu.querySelectorAll('.category-branch')];
+  const close = () => { menu.open = false; branches.forEach(b => { b.open = false; }); };
+  branches.forEach(branch => branch.addEventListener('toggle', () => {
+    if (branch.open) branches.forEach(other => { if (other !== branch) other.open = false; });
+  }));
+  document.addEventListener('click', event => { if (!menu.contains(event.target)) close(); });
+  menu.addEventListener('click', event => { if (event.target.closest('a')) close(); });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && menu.open) { close(); menu.querySelector('summary').focus(); }
+  });
+  const reveal = () => {
+    let id; try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+    const target = document.getElementById(id);
+    if (target?.closest('.empty-category')) target.closest('.empty-category').open = true;
+    const legacy = target?.matches('[data-canonical]') ? target : null;
+    if (legacy && document.querySelector('[data-legacy-default]')) location.replace(legacy.href);
+  };
+  reveal(); addEventListener('hashchange', reveal);
+})();
